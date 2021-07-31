@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using LemonBot.NET.ConsoleApp.Services;
+using LemonBot.Services;
 using LemonBot.Clients.Configurations;
 using LemonBot.Commands.Extensions;
 using LemonBot.Clients.Extensions;

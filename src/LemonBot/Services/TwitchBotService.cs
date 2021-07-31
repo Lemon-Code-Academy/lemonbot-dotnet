@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using LemonBot.Clients;
 using LemonBot.Commands;
 
-namespace LemonBot.NET.ConsoleApp.Services
+namespace LemonBot.Services
 {
     public class TwitchBotService : BackgroundService 
     {
@@ -16,11 +16,11 @@ namespace LemonBot.NET.ConsoleApp.Services
 
         private readonly TwitchClientProxy _client;
 
-        private readonly BotCommandFactory _commandFactory;
+        private readonly BotCommandResolver _commandFactory;
 
         private HashSet<string> _usersAlreadyJoined;
 
-        public TwitchBotService(TwitchClientProxy client, BotCommandFactory commandFactory, ILogger<TwitchBotService> logger)
+        public TwitchBotService(TwitchClientProxy client, BotCommandResolver commandFactory, ILogger<TwitchBotService> logger)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _commandFactory = commandFactory ?? throw new ArgumentNullException(nameof(commandFactory));
@@ -57,6 +57,7 @@ namespace LemonBot.NET.ConsoleApp.Services
                 c.OnConnected -= OnClientConnected;
                 c.OnConnectionError -= OnConnectionErrorOccured;
                 c.OnChatCommandReceived -= OnChatCommandReceived;
+                c.OnMessageReceived -= OnMessageReceived;
             });
         }
 
@@ -68,13 +69,25 @@ namespace LemonBot.NET.ConsoleApp.Services
                 c.OnConnected += OnClientConnected;
                 c.OnConnectionError += OnConnectionErrorOccured;
                 c.OnChatCommandReceived += OnChatCommandReceived;
+                c.OnMessageReceived += OnMessageReceived;
             });
+        }
+
+        private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
+        {
+            _logger.LogInformation("{UserName} says: {Message}", e.ChatMessage.Username, e.ChatMessage.Message);
         }
 
         private async void OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
         {
-            var command = _commandFactory.GetCommandByPrefix(e.Command.ChatMessage.Message);
-            await command?.ExecuteAsync();
+            var context = new BotCommandContext 
+            { 
+                UserName = e.Command.ChatMessage.Username,
+                Message = e.Command.ChatMessage.Message 
+            };
+
+            var command = _commandFactory.ResolveByMessage(e.Command.ChatMessage.Message);
+            await command?.ExecuteAsync(context);
         }
 
         private void OnConnectionErrorOccured(object sender, OnConnectionErrorArgs e)
