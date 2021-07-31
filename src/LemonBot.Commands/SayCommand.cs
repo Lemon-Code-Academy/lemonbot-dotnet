@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace LemonBot.Commands
 {
-    [BotCommand("!today", HelpText = "Show today date")]
-    public class TodayCommand : IBotCommand
+    [BotCommand("!say", HelpText = "Say something to the chat")]
+    public class SayCommand : IBotCommand
     {
         private readonly TwitchClientProxy _client;
-        private readonly ILogger<TodayCommand> _logger;
+        private readonly ILogger<SayCommand> _logger;
 
-        public TodayCommand(TwitchClientProxy client, ILogger<TodayCommand> logger)
+        public SayCommand(TwitchClientProxy client, ILogger<SayCommand> logger)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -20,7 +20,12 @@ namespace LemonBot.Commands
 
         public Task ExecuteAsync(BotCommandContext context)
         {
-            _client.SendMessage(DateTime.Today.ToShortDateString());
+            var userName = context.UserName;
+            var message = context.Message;
+
+            var messageToSend = $"{userName} says: {message.Replace("!say", string.Empty)}";
+            _client.SendMessage(messageToSend);
+
             return Task.CompletedTask;
         }
     }
