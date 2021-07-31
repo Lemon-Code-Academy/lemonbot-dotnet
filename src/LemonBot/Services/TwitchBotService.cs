@@ -7,6 +7,8 @@ using TwitchLib.Client.Events;
 using Microsoft.Extensions.Logging;
 using LemonBot.Clients;
 using LemonBot.Commands;
+using Microsoft.AspNetCore.SignalR.Client;
+using TwitchLib.Client.Models;
 
 namespace LemonBot.Services
 {
@@ -20,6 +22,8 @@ namespace LemonBot.Services
 
         private HashSet<string> _usersAlreadyJoined;
 
+        private HubConnection _connection;
+
         public TwitchBotService(TwitchClientProxy client, BotCommandResolver commandFactory, ILogger<TwitchBotService> logger)
         {
             _client = client ?? throw new ArgumentNullException(nameof(client));
@@ -29,18 +33,31 @@ namespace LemonBot.Services
             _usersAlreadyJoined = new();
         }
 
-        protected override  Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _connection = new HubConnectionBuilder()
+                .WithUrl("https://localhost:5001/bot")
+                .Build();
+
+            try
+            {
+                await _connection.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Connection failed: {Message}", ex.Message);
+            }
+
             InitializeTwitchClient();
             ConnectToTwitch();
-
-            return Task.CompletedTask;
         }
 
-        public override Task StopAsync(CancellationToken cancellationToken)
+        public override async Task StopAsync(CancellationToken cancellationToken)
         {
             UnregisterClientEvents();
-            return base.StopAsync(cancellationToken);
+
+            await _connection.StopAsync();
+            await base.StopAsync(cancellationToken);
         }
 
         private void InitializeTwitchClient()
@@ -73,21 +90,32 @@ namespace LemonBot.Services
             });
         }
 
+        private async Task ExecuteCommandByMessage(ChatMessage chatMessage)
+        {
+            var context = new BotCommandContext
+            {
+                UserName = chatMessage.Username,
+                Message = chatMessage.Message,
+                Connection = _connection
+            };
+
+            var command = _commandFactory.ResolveByMessage(chatMessage.Message);
+            if (command is not null)
+            {
+                await command.ExecuteAsync(context);
+            }
+        }
+
         private void OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
             _logger.LogInformation("{UserName} says: {Message}", e.ChatMessage.Username, e.ChatMessage.Message);
+
+            //await ExecuteCommandByMessage(e.ChatMessage);
         }
 
         private async void OnChatCommandReceived(object sender, OnChatCommandReceivedArgs e)
         {
-            var context = new BotCommandContext 
-            { 
-                UserName = e.Command.ChatMessage.Username,
-                Message = e.Command.ChatMessage.Message 
-            };
-
-            var command = _commandFactory.ResolveByMessage(e.Command.ChatMessage.Message);
-            await command?.ExecuteAsync(context);
+            await ExecuteCommandByMessage(e.Command.ChatMessage);
         }
 
         private void OnConnectionErrorOccured(object sender, OnConnectionErrorArgs e)
