@@ -1,5 +1,6 @@
 using LemonBot.Clients;
 using LemonBot.Commands.Attributes;
+using LemonBot.Commands.Services;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Text;

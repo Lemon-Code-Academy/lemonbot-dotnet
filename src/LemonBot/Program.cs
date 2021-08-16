@@ -1,12 +1,13 @@
-﻿using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
-using LemonBot.Services;
-using LemonBot.Clients.Configurations;
-using LemonBot.Commands.Extensions;
+﻿using LemonBot.Clients.Configurations;
 using LemonBot.Clients.Extensions;
+using LemonBot.Commands.Extensions;
+using LemonBot.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 var host = Host.CreateDefaultBuilder()
-    .ConfigureServices((context, services) => {
+    .ConfigureServices((context, services) =>
+    {
         var configuration = context.Configuration;
 
         services.Configure<TwitchBotOptions>(configuration.GetSection("TwitchBot"));

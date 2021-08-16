@@ -1,5 +1,3 @@
-using System;
-
 namespace LemonBot.Web.Models
 {
     public class ErrorViewModel

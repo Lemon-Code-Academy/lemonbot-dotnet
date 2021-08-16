@@ -15,7 +15,7 @@ namespace LemonBot.Commands
             }
 
             await context.Connection.InvokeAsync(
-                "ShowOverlay",
+                "SendOverlay",
                 "https://cdn.pixabay.com/photo/2015/04/27/22/53/man-742766_960_720.jpg");
         }
     }

@@ -29,7 +29,7 @@
             await start();
         });
 
-        connection.on("OverlayShown", (resourceUrl) => {
+        connection.on("OverlayReceived", (resourceUrl) => {
             const container = document.getElementById("overlayContent");
 
             let image = document.createElement("img");

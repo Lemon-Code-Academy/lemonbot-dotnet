@@ -1,18 +1,19 @@
-using System.Collections.Generic;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
-using TwitchLib.Client.Events;
-using Microsoft.Extensions.Logging;
 using LemonBot.Clients;
 using LemonBot.Commands;
+using LemonBot.Commands.Services;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 
 namespace LemonBot.Services
 {
-    public class TwitchBotService : BackgroundService 
+    public class TwitchBotService : BackgroundService
     {
         private readonly ILogger<TwitchBotService> _logger;
 

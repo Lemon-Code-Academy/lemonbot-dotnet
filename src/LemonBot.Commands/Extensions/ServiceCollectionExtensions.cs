@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using LemonBot.Commands.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LemonBot.Commands.Extensions
 {

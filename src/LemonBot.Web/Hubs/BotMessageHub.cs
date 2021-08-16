@@ -25,9 +25,9 @@ namespace LemonBot.Web.Hubs
             return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task ShowOverlay(string resourceUrl)
+        public async Task SendOverlay(string resourceUrl)
         {
-            await Clients.All.SendAsync("OverlayShown", resourceUrl);
+            await Clients.All.SendAsync("OverlayReceived", resourceUrl);
         }
     }
 }
